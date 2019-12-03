@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public abstract class Consumer {
 
-    private final static String TOPIC = "runnar_topic_match_update";
+    private final static String TOPIC = "update";
     protected DefaultMQPushConsumer defaultMQPushConsumer;
     private String namesrvAddr;
     private int maxThread;
@@ -50,6 +50,7 @@ public abstract class Consumer {
         // 如果同一个jvm中，不同的producer需要往不同的rocketmq集群发送消息，需要设置不同的instanceName
         // defaultMQPushConsumer.setInstanceName(mqCfg.getInstanceName());
         defaultMQPushConsumer.setConsumerGroup(group);
+        //需要和发送端topic相同才能消费消息
         defaultMQPushConsumer.subscribe(TOPIC, "");
         defaultMQPushConsumer.setConsumeMessageBatchMaxSize(getMaxSize());    //每次拉取10条消息
         defaultMQPushConsumer.registerMessageListener(new MessageListenerConcurrently() { // 这里可以抽离出来，添加一个继承MessageListenerConcurrently的类
@@ -57,7 +58,8 @@ public abstract class Consumer {
             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                 if (null != msgs && !msgs.isEmpty()) {
                     for (MessageExt msg : msgs) {
-
+                            log.info("发送端的topic为:{}",msg.getTopic());
+                            log.info("发送端的tag为:{}",msg.getTags());
                         if (TOPIC.equals(msg.getTopic())) {
                             try {
                                 //消息体没有sid，或者消息不重复

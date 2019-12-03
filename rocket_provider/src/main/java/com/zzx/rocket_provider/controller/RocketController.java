@@ -33,7 +33,7 @@ public class RocketController {
         // 发送赛事更新消息MQ
         try {
 
-            producer.send(message.toString(), RocketTopics.getTopicOne(), "", new SendCallback() {
+            producer.send(message.toString(), RocketTopics.getTopicOne(), "abc", new SendCallback() {
 
                 @Override
                 public void onSuccess(SendResult sendResult) {
